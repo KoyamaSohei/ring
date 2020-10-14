@@ -67,6 +67,11 @@ class ringProvider : public tl::provider<ringProvider> {
     }
 };
 
+namespace {
+std::function<void(int)> shutdown_handler;
+void signal_handler(int signal) { shutdown_handler(signal); }
+}
+
 int main(int argc, char *argv[]) {
   tl::engine myEngine("tcp",THALLIUM_SERVER_MODE,true);
   std::cout << "Server running at address " << myEngine.self() << std::endl;
@@ -74,6 +79,11 @@ int main(int argc, char *argv[]) {
   if(argc > 1) {
     provider.call_join(argv[1]);
   }
+  signal(SIGINT,signal_handler);
+  shutdown_handler = [&](int signal) {
+    provider.call_leave();
+    exit(signal);
+  };
   myEngine.wait_for_finalize();
   return 0;
 }
