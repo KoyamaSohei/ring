@@ -18,6 +18,9 @@ std::string get_coordinator(std::vector<std::string> &addrs) {
   });
 }
 
+const int DURATION = 2;
+const int TIMEOUT = 5;
+
 class ringProvider : public tl::provider<ringProvider> {
   private:
     std::string self,prev,next;
@@ -178,7 +181,7 @@ class ringProvider : public tl::provider<ringProvider> {
       }
       std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
       int64_t diff = std::chrono::duration_cast<std::chrono::seconds>(now-last_notify).count();
-      if(diff < 5) {
+      if(diff < TIMEOUT) {
         return;
       }
       if(get_next()==self) {
@@ -199,7 +202,6 @@ class ringProvider : public tl::provider<ringProvider> {
 };
 
 int main(int argc, char *argv[]) {
-  pthread_t t;
   static sigset_t ss;
   sigemptyset(&ss);
   sigaddset(&ss, SIGINT);
@@ -220,7 +222,7 @@ int main(int argc, char *argv[]) {
   });
 
   std::thread tick([&]{
-    const std::chrono::seconds interval(2);
+    const std::chrono::seconds interval(DURATION);
     while(1) {
       std::this_thread::sleep_for(interval);
       provider.tick();
