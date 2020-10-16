@@ -93,7 +93,8 @@ class ringProvider : public tl::provider<ringProvider> {
       }
       std::cout << "heart beat received.. " << std::endl;
       addrs.push_back(self);
-      if(get_coord() != "" && addrs[0]!=get_coord()) {
+      if(addrs[0]!=get_coord()) {
+        std::cout << coord << std::endl;
         last_notify = std::chrono::system_clock::now() - std::chrono::seconds(2*TIMEOUT);
       }
       tl::endpoint server = get_engine().lookup(get_next());
@@ -200,6 +201,7 @@ class ringProvider : public tl::provider<ringProvider> {
       for(std::string addr:addrs) {
         std::cout << addr << std::endl;
       }
+      set_coord(get_coordinator(addrs));
       m_coordinator.on(ph)(addrs,self);
     }
 };
