@@ -156,7 +156,7 @@ class ringProvider : public tl::provider<ringProvider> {
       std::string p = m_join.on(ph)(self);
       set_prev(p);
     }
-    void call_leave() {
+    void leave() {
       if(self==get_prev()) {
         assert(self==get_next());
         return;
@@ -216,7 +216,7 @@ int main(int argc, char *argv[]) {
   std::thread sig([&]{
     int num=0;
     sigwait(&ss,&num);
-    provider.call_leave();
+    provider.leave();
     std::cout << "signal received " << num << std::endl;
     exit(1);
   });
