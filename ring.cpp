@@ -93,6 +93,9 @@ class ringProvider : public tl::provider<ringProvider> {
       }
       std::cout << "heart beat received.. " << std::endl;
       addrs.push_back(self);
+      if(get_coord() != "" && addrs[0]!=get_coord()) {
+        last_notify = std::chrono::system_clock::now() - std::chrono::seconds(2*TIMEOUT);
+      }
       tl::endpoint server = get_engine().lookup(get_next());
       tl::provider_handle ph(server, 1);
       m_list.on(ph)(addrs);
