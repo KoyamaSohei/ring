@@ -5,6 +5,18 @@ ring
 
 - Setup [spack](https://github.com/spack/spack)
 
+```bash
+$ git clone https://github.com/spack/spack.git
+$ . spack/share/spack/setup-env.sh
+```
+
+- Add sds-repo
+
+```bash
+$ git clone https://xgitlab.cels.anl.gov/sds/sds-repo.git
+$ spack repo add sds-repo
+```
+
 - Install and load [mochi-thallium](https://xgitlab.cels.anl.gov/sds/thallium)
 
 
