@@ -85,7 +85,7 @@ class ringProvider : public tl::provider<ringProvider> {
       assert(addrs.size()>0);
       last_notify = std::chrono::system_clock::now();      
       if(addrs[0]==self) {
-        std::cout << "heart beat emitted.. nodes is " << std::endl;
+        std::cout << "heart beat emitted.. The list of nodes consists of " << std::endl;
         for(std::string addr:addrs) {
           std::cout << addr << std::endl;
         }
@@ -94,7 +94,7 @@ class ringProvider : public tl::provider<ringProvider> {
       std::cout << "heart beat received.. " << std::endl;
       addrs.push_back(self);
       if(addrs[0]!=get_coord()) {
-        std::cout << coord << std::endl;
+        std::cout << "now recorded coordinator is " << get_coord() << " but now coordinator is" << addrs[0] << std::endl;
         last_notify = std::chrono::system_clock::now() - std::chrono::seconds(2*TIMEOUT);
       }
       tl::endpoint server = get_engine().lookup(get_next());
@@ -121,7 +121,7 @@ class ringProvider : public tl::provider<ringProvider> {
       if(oldcoord==get_coord()) {
         return;
       }
-      std::cout << "coord is " << get_coord() << std::endl;
+      std::cout << "coordinator is " << get_coord() << std::endl;
       tl::endpoint server = get_engine().lookup(get_next());
       tl::provider_handle ph(server, 1);
       m_coordinator.on(ph)(addrs,self);
@@ -193,11 +193,11 @@ class ringProvider : public tl::provider<ringProvider> {
         set_coord(self);
         return;
       }
-      std::cout << "timeout, maybe coordinator dead." << std::endl;
+      std::cout << "timeout!" << std::endl;
       tl::endpoint server = get_engine().lookup(get_next());
       tl::provider_handle ph(server, 1);
       std::vector<std::string> addrs = m_election.on(ph)(self);
-      std::cout << "election finished : " << std::endl;
+      std::cout << "election finished. The list of nodes consists of " << std::endl;
       for(std::string addr:addrs) {
         std::cout << addr << std::endl;
       }
@@ -222,7 +222,7 @@ int main(int argc, char *argv[]) {
     int num=0;
     sigwait(&ss,&num);
     provider.leave();
-    std::cout << "signal received " << num << std::endl;
+    std::cout << "Signal received " << num << std::endl;
     exit(1);
   });
 
