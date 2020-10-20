@@ -85,7 +85,7 @@ class ringProvider : public tl::provider<ringProvider> {
     }
     void list(std::vector<std::string> addrs) {
       assert(addrs.size()>0);
-      last_notify = std::chrono::system_clock::now();      
+      last_notify = std::chrono::system_clock::now();
       if(addrs[0]==self) {
         std::cout << "heart beat emitted.. The list of nodes consists of " << std::endl;
         for(std::string addr:addrs) {
