@@ -19,6 +19,8 @@ std::string get_coordinator(std::vector<std::string> &addrs) {
 }
 
 const int DURATION = 2;
+const std::chrono::seconds interval(DURATION);
+
 const int TIMEOUT = 5;
 
 class ringProvider : public tl::provider<ringProvider> {
@@ -99,7 +101,7 @@ class ringProvider : public tl::provider<ringProvider> {
       }
       tl::endpoint server = get_engine().lookup(get_next());
       tl::provider_handle ph(server, 1);
-      m_list.on(ph)(addrs);
+      m_list.on(ph).timed(interval,addrs);
     }
     void election(const tl::request& req,std::string host) {
       if(host==self) {
@@ -109,7 +111,7 @@ class ringProvider : public tl::provider<ringProvider> {
       }
       tl::endpoint server = get_engine().lookup(get_next());
       tl::provider_handle ph(server, 1);
-      std::vector<std::string> addrs = m_election.on(ph)(host);
+      std::vector<std::string> addrs = m_election.on(ph).timed(interval,host);
       addrs.push_back(self);
       req.respond(addrs);
       return;
@@ -124,7 +126,7 @@ class ringProvider : public tl::provider<ringProvider> {
       std::cout << "coordinator is " << get_coord() << std::endl;
       tl::endpoint server = get_engine().lookup(get_next());
       tl::provider_handle ph(server, 1);
-      m_coordinator.on(ph)(addrs,self);
+      m_coordinator.on(ph).timed(interval,addrs,self);
       return;
     }
     bool is_coordinator() {
@@ -157,7 +159,7 @@ class ringProvider : public tl::provider<ringProvider> {
       tl::endpoint targetServer = get_engine().lookup(target);
       tl::provider_handle ph(targetServer, 1);
       set_next(target);
-      std::string p = m_join.on(ph)(self);
+      std::string p = m_join.on(ph).timed(interval,self);
       set_prev(p);
     }
     void leave() {
@@ -176,7 +178,7 @@ class ringProvider : public tl::provider<ringProvider> {
       std::vector<std::string> addrs(1,self);
       tl::endpoint server = get_engine().lookup(get_next());
       tl::provider_handle ph(server, 1);
-      m_list.on(ph)(addrs);
+      m_list.on(ph).timed(interval,addrs);
     }
     void tick() {
       if(is_coordinator()) {
@@ -196,13 +198,13 @@ class ringProvider : public tl::provider<ringProvider> {
       std::cout << "timeout!" << std::endl;
       tl::endpoint server = get_engine().lookup(get_next());
       tl::provider_handle ph(server, 1);
-      std::vector<std::string> addrs = m_election.on(ph)(self);
+      std::vector<std::string> addrs = m_election.on(ph).timed(interval,self);
       std::cout << "election finished. The list of nodes consists of " << std::endl;
       for(std::string addr:addrs) {
         std::cout << addr << std::endl;
       }
       set_coord(get_coordinator(addrs));
-      m_coordinator.on(ph)(addrs,self);
+      m_coordinator.on(ph).timed(interval,addrs,self);
     }
 };
 
@@ -227,7 +229,6 @@ int main(int argc, char *argv[]) {
   });
 
   std::thread tick([&]{
-    const std::chrono::seconds interval(DURATION);
     while(1) {
       std::this_thread::sleep_for(interval);
       provider.tick();
